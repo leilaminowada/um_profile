@@ -1,0 +1,178 @@
+README
+Universal Machine HW6
+Drake Nguyen, Leila Minowada
+11/20/18 (we used a late token)
+
+-----Acknowledgements------
+We received help from the COMP40 TAs in Halligan while doing 
+this assignment.
+
+-----Correctly Implemented-----
+ To the best of our knowledge, everything in our UM works
+  as it should 
+ according to the spec. The specific things that were listed 
+ on the spec
+ that are allowed to fail are not checked for, but other 
+ than that we are
+ pretty sure we caught the CREs.
+
+-----Significant departure from our design-----
+We decided to implement each memory segment as a 
+dynamic array of words 
+instead 
+of a sequence of words in our segmented memory implementation. 
+Therefore the
+segment module was removed and all the operations 
+on each segment were 
+implemented inside the segmented memory instead. 
+
+-----Architecture of the UM-----
+Instruction module: instructions.h, instructions.c
+	Functions: 
+		-implementations for each of the 14 UM instructions
+		-parameters: registers a, b, and/or c, value for 
+		load_value 
+				instruction
+				calls/executes actual instructions using 
+				memory_seg interface
+		-Secret: how to execute each of the 14 UM instructions
+Bitpack module: bitpack_um.h, bitpack_um.c
+	-Contains: functions that bitpack, check, and remove bits
+	-Secret: how to bitpack opcode, registers, 
+	and values into a UM 
+		instruction
+	 as well as how to unpack them from instructions given 
+Outputting module: write.h, write.c
+	- Contains: emit, write functions that use bitpack to print 
+	in big endian 
+	order, an I/O device capable of displaying ASCII characters 
+	and performing
+	 input and output of unsigned 8-bit characters
+	- Secret: how to write instructions to output 
+	and deal with streams
+Memory segment module: memory_seg.h, memory_seg.c
+Contains: 
+	- Implementation of the UM’s segmented memory
+	- Struct to represent one segment
+		- Array of unsigned 32 bit ints to represent words
+		- uint32_t length
+	- Struct containing 2 Hanson sequences
+		- 1 containing mapped segments
+		- 1 containing unmapped segments
+	Functions:
+		- Mem_T new_Mem();
+			- Returns the pointer to new segemented memory
+		- segment_Id Mem_map(Mem_T mem, uint32_t length);
+			- Creates a new memory segment with the 
+			designated length and 
+				returns the id of the new memory segment
+		- void Mem_unmap(Mem_T mem, segment_Id id);
+			- Unmaps the memory segment at the specified id
+		- uint32_t Mem_load(Mem_T mem, segment_Id id, 
+		uint32_t offset);
+	 		- Load the value at at the specified id and offset
+		- void Mem_store(Mem_T mem, segment_Id id, uint32_t offset, 
+						    uint32_t value);
+			- Stores value at the specified id and offset
+		- void Mem_copy(Mem_T mem, segment_Id copy_id);
+			- Copies segment at the from id and 
+			replaces the segment at the 
+			into id with the copied segment 
+			void free_Mem(Mem_T mem);
+			- Frees the entire segmented memory that was 
+			created by an 
+				instance of new_mem()
+	Secret: 
+		how to get words and update words within segments, modify 
+		segment ids,
+		deal with and unmapped ids when creating/deleting 
+		get_instructions.c
+
+Get Instructions Module: get_instructions.h get_instructions.c
+	Contains: wrapper functions to unbitpack the 
+	UM instructions and call 
+			correct instruction execution
+	Functions: 
+		- wrapper functions to unbitpack UM
+		- function to ID the correct instruction implementation 
+		to call
+		- uses the instructions.h interface to 
+		execute the instruction
+	Secret: how to decide which instruction to run, and get all the 
+		information out of a bitpacked instruction
+
+um.c
+Contains: main function that runs the UM, implementation of 
+registers, 
+	and program counter
+Secret: the running code, the registers and 32 bit program counter
+
+-----How long it takes to execute 50 millions instructions-----
+There are about 11,500 instructions in midmark and it takes our UM ~20 
+seconds to execute. Therefore, it would take around 
+24 hours for our UM
+to run 50 million instructions.
+
+-----Unit tests-----
+"cmov"
+	tests cmov when rc ==0
+"cmov2"
+	tests cmov when rc != 0
+ "sload1"
+	tests sload by mapping a new segment and then loading 
+	a value into the 
+	first word in that segment
+"activate1"
+	tests mapping instruction by mapping a new segment and halting
+"sstore1"
+	checks the segmented storing instruction by
+	 mapping a segment, then 
+	calling segmented store, then using segmented 
+	load and output 
+	to check
+	that it stored properly
+"Add1"
+	Load a value to r1, a value to r2, add them and 
+	store result 
+	in r3
+	Output r3 and check for the expected result
+	Halt
+"Mul1"
+	Load a value to r1, a value to r2, multiply them 
+	and store 
+	result in r3
+	Output r3 and check for the expected result
+	Halt
+"div1"       
+	Load a value to r1, a value to r2, divide them and 
+	store result 
+	in r3
+	Output r3 and check for the expected result
+	Halt
+"Nand1"
+	Load a value to r1, a value to r2, nand them and 
+	store result 
+	in r3
+	Output r3 and check for the expected result
+	Halt
+"Unmap1"
+	Choose a specific segment of specific length
+	Map it
+	Then unmap it
+	Halt
+"input1"
+	waits for input, then outputs it immediately to check 
+	if they’re the same
+"halt"
+	tests the halt instruction by calling it
+“verbose_halt”
+	tests loadval and output, and halt by not having a 
+	halt after printing 
+	“Bad!”
+
+-----Time to Complete Assignment-----
+For this assignment, it took approximately 2 hours to 
+analyze the problem. Once the problem was analyzed, it took
+approximately another 2 hours to design, and 16 hours to 
+solve the problem.
+ 

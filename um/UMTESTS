@@ -1,0 +1,14 @@
+UMTESTS 
+cmov.um
+cmov2.um
+sload1.um
+activate1.um
+sstore1.um
+add1.um
+mul1.um
+div1.um
+nand1.um
+unmap1.um
+input1.um
+halt.um
+verbose_halt.um
